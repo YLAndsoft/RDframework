@@ -2,6 +2,7 @@
 <resources>
     <color name="white">#ffffff</color>
     <color name="default_color">#b5b5b5</color>
+    <color name="default_select_color">#fca2e7</color>
     <color name="background_tab_pressed">#00000000</color>
     <!--不透明度值:-->
     <color name="ts_100">#FF000000</color><!--100%-->

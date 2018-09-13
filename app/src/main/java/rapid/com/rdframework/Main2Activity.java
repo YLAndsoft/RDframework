@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import base.BaseIMActivity;
+import base.BaseTIMActivity;
 import rapid.com.rdframework.fragments.ModularFiveFragment;
 import rapid.com.rdframework.fragments.ModularFourFragmentn;
-import rapid.com.rdframework.fragments.ModularsTwoFragment;
-import rapid.com.rdframework.fragments.ModularThreeFragment;
 import rapid.com.rdframework.fragments.ModularOneFragment;
+import rapid.com.rdframework.fragments.ModularThreeFragment;
+import rapid.com.rdframework.fragments.ModularsTwoFragment;
 
-public class MainActivity extends BaseIMActivity {
+public class Main2Activity extends BaseTIMActivity {
     /**模块1*/
     ModularOneFragment oneFragment;
     /**模块2*/
@@ -62,6 +63,17 @@ public class MainActivity extends BaseIMActivity {
                 R.mipmap.ic_home_actionbar3,
                 R.mipmap.ic_home_actionbar4};
         return imageNormals;
+    }
+
+    @Override
+    public int[] setTabTxt() {
+         int[] tabTxts = {
+                R.string.tabTxt1,
+                R.string.tabTxt2,
+                R.string.tabTxt3,
+                R.string.tabTxt4,
+                R.string.tabTxt5};
+        return tabTxts;
     }
 
     //设置要绑定的模块

@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">RDframework</string>
+
+    <string name="tabTxt1">首页</string>
+    <string name="tabTxt2">收藏</string>
+    <string name="tabTxt3">推荐</string>
+    <string name="tabTxt4">榜单</string>
+    <string name="tabTxt5">个人</string>
+
+
 </resources>

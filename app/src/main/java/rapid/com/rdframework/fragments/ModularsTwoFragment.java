@@ -1,6 +1,5 @@
 package rapid.com.rdframework.fragments;
 
-import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 
@@ -37,7 +36,7 @@ public class ModularsTwoFragment extends BaseFragment {
 //    private Button btn9;
     @Override
     public int bindLayout() {
-        return R.layout.modularone_layout;
+        return R.layout.modulartwo_layout;
     }
     @Override
     protected void initView() {

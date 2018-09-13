@@ -42,7 +42,7 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements V
     private boolean isSetActionBarColor = true;
     /** 当前Activity渲染的视图View **/
     protected View mContextView = null;
-    private int mResColor = R.color.ts_0;
+    private int mResColor = R.color.default_color;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;

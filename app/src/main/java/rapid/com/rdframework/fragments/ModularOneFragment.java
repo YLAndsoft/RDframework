@@ -46,7 +46,7 @@ public class ModularOneFragment extends BaseFragment {
 
     @Override
     public int bindLayout() {
-        return R.layout.modulartwo_layout;
+        return R.layout.modularone_layout;
     }
 
     @Override
