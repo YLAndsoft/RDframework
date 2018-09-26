@@ -2,9 +2,11 @@ package base;
 
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -65,7 +67,20 @@ public abstract class BaseIMActivity extends MenuFragmentActivity {
     public abstract int[] unSelectImags();//未选中图标
     public abstract List<Fragment> setFragments();//Fragment集合
 
-
+    private long mkeyTime;
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if ((System.currentTimeMillis() - mkeyTime) > 2000) {
+                mkeyTime = System.currentTimeMillis();
+                Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_LONG).show();
+            } else {
+                finish();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected boolean onTabClick(int tabId) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="white">#ffffff</color>
     <!-- 覆盖颜色 -->
     <color name="bgColor_overlay_black">#95000000</color>
     <!-- 窗口背景颜色 -->

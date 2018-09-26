@@ -53,14 +53,6 @@ public abstract class BaseTIMActivity extends MenuFragmentActivity {
             showLog(3,"tab对应的界面不能少于4个");
             return;
         }
-        if(null==imgsHovers||imgsHovers.length<4){
-            showLog(3,"选中图标不能少于4个");
-            return;
-        }
-        if(null==imageNormals||imageNormals.length<4){
-            showLog(3,"未选中图标不能少于4个");
-            return;
-        }
         for (int i = 0; i < fragments.size(); i++) {
             imgBtn[i] = (ImageView) findViewById(imgIds[i]);
             imgBtn[i].setImageResource(imageNormals[i]);

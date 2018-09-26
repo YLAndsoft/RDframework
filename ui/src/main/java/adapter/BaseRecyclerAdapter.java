@@ -29,7 +29,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         void onItemClick(View view, int position);
     }
     public interface OnItemLongClickListener {
-        boolean onItemLongClick(View view, int position);
+        boolean onItemLongClick(View view, int position,Object obj);
     }
     public interface OnClickListener {
         void onClick(View view, int position);
@@ -61,7 +61,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             @Override
             public boolean onLongClick(View view) {
                 if (longClickListener != null && view != null ) {
-                    longClickListener.onItemLongClick(view,position);
+                    longClickListener.onItemLongClick(view,position,list.get(position));
                     return true;
                 }
                 return false;
@@ -108,6 +108,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         list.addAll(lis);
         this.notifyItemRangeInserted(list.size()-lis.size(),list.size());
     }
-
+    public void insert(T t){
+        list.add(t);
+        this.notifyItemRangeInserted(list.size()-1,list.size());
+    }
 
 }

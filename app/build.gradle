@@ -26,13 +26,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(':base')
-    implementation project(':ui')
 
-    /**
-     * xUtils3 框架，选择原因：数据库，网络，注解，集成了三种
-     */
-    implementation 'org.xutils:xutils:3.5.0'
-    /**RecyclerView依赖*/
+    /**cardview 依赖*/
     implementation 'com.android.support:cardview-v7:27.1.0'
 
 }

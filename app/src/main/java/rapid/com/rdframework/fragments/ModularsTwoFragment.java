@@ -86,7 +86,7 @@ public class ModularsTwoFragment extends BaseFragment {
                 });
                 break;
             case R.id.btn6:
-                AV.showSucess(mContext, "检查结果","没有任何毛病！");
+                AV.showSucess(mContext, "检查结果","没有任何毛病！",null);
                 break;
             case R.id.btn7:
                 AV.showSelectView(mContext,

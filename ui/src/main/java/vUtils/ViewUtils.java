@@ -1,6 +1,8 @@
 package vUtils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -50,6 +52,18 @@ public class ViewUtils {
         //内容随高度变化
         layoutManager.setAutoMeasureEnabled(true);
         return layoutManager;
+    }
+
+    public static void startActivity(Activity activity,Class<?> clazz){
+        Intent intent = new Intent(activity,clazz);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
+    }
+    public static void startFinishActivity(Activity activity, Class<?> clazz){
+        Intent intent = new Intent(activity,clazz);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
+        activity.finish();
     }
 
     private static RequestOptions requestOptions;

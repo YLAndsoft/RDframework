@@ -2,6 +2,7 @@ package base;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -104,6 +105,9 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
         finish();
     }
 
+    public void toNext(Class<?> clazz){
+        startActivity(new Intent(mContext,clazz));
+    }
 
     private void setActionBarColor(int color) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

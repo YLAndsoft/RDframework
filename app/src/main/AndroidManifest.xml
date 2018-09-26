@@ -13,8 +13,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name="rapid.com.rdframework.MyApplication"
         android:theme="@style/AppTheme">
-        <activity android:name="rapid.com.rdframework.SelectActivity">
+        <activity android:name="rapid.com.rdframework.login.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,8 +23,18 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="rapid.com.rdframework.SelectActivity"/>
         <activity android:name=".MainActivity"/>
         <activity android:name=".Main2Activity"/>
+        <activity android:name="rapid.com.rdframework.dbdemo.SQLiteActivity"/>
+        <activity android:name="rapid.com.rdframework.dbdemo.SharedActivity"/>
+        <activity android:name="rapid.com.rdframework.utilsdemo.UtilsDemoActivity"/>
+        <activity android:name="rapid.com.rdframework.utilsdemo.ComparableActivity"/>
+        <activity android:name="rapid.com.rdframework.utilsdemo.EventBusActivity"/>
+        <activity android:name="rapid.com.rdframework.utilsdemo.FastBlurActivity"/>
+
+
+
     </application>
 
 </manifest>

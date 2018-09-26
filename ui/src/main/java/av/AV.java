@@ -17,6 +17,9 @@ public class AV {
     public interface OnSelectClickListener{
         void onSelectListener(int position);
     }
+    public interface OnSucessListener{
+        void onSucess();
+    }
 
     /**
      * 选择拍照视图
@@ -35,7 +38,7 @@ public class AV {
             });
 
         }
-        if(!alertView.isShowing())alertView.show();
+        alertView.show();
     }
 
     /**
@@ -44,10 +47,11 @@ public class AV {
      * @param title
      * @param content
      */
-    public static void showSucess(Context mContext,String title,String content){
+    public static void showSucess(Context mContext, String title, String content, final OnSucessListener listener){
         new AlertView(title, content, null, new String[]{"确定"}, null, mContext, AlertView.Style.Alert, new OnItemClickListener() {
             @Override
             public void onItemClick(Object o, int position) {
+                listener.onSucess();
             }
         }).show();
     }
