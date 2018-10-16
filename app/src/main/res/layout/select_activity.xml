@@ -142,7 +142,49 @@
                 android:background="@color/default_color"/>
 
 
+            <android.support.v7.widget.AppCompatSeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="40"/>
 
+<!--            <android.support.v7.widget.AppCompatRatingBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:rating="3"/>
+            <android.support.v7.widget.AppCompatRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"/>-->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginLeft="10dp"
+                    android:text="Android-S交互"/>
+
+                <Button
+                    android:id="@+id/commit3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="20dp"
+                    android:text="DEMO"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/default_color"/>
+J
 
         </LinearLayout>
 
