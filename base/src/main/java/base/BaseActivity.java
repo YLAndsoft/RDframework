@@ -109,6 +109,11 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
         startActivity(new Intent(mContext,clazz));
     }
 
+    public void toFinishNext(Class<?> clazz){
+        startActivity(new Intent(mContext,clazz));
+        finish();
+    }
+
     private void setActionBarColor(int color) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
