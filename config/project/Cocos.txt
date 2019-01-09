@@ -1,0 +1,8 @@
+无|标题|混淆游戏|1
+imageDirectory|选择文件夹|1.请选择图片文件目录|选择目录
+editJsDirectory|选择文件夹|2.请选择JS文件目录|选择目录
+sceneDirectory|选择文件夹|3.请选择场景文件目录|选择目录
+isOpen|JComboBox下拉选|是否打印日志|true|false
+isLaya|JComboBox下拉选|是否是Laya混淆|true|false
+无|混淆|按钮|开始混淆!
+关键字|SpecialKey=Loader,Handler,i,View,Dialog,style,properties,width,x,y,player,atm

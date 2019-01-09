@@ -112,7 +112,6 @@ public class CocosJSExcute {
                 if(tmp.trim().length()>0){
                     FileUtils.saveFile(tmp,w);//保存至新文件中
                 }
-
             }
         }catch (Exception e){
             e.printStackTrace();

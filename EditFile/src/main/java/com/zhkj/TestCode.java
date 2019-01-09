@@ -19,13 +19,15 @@ public class TestCode {
 
     public static void main(String [] a){
 //        String meteRegex = "(\\w+)(\\.jpg|\\.png)(\\.meta)$";
-        String regex = "(img_guan@2x)(\\.jpg|\\.png|\\.gif)";
-        String str = "            this.yl.skin = 'img/img_guan@2x.png';";
-        Matcher matcher = EditTools.getMatcher(str,regex);
-        if(matcher.find()){
-            System.out.println(matcher.group(1));
-        }
-
+//        String regex = "(img_guan@2x)(\\.jpg|\\.png|\\.gif)";
+        String regex = "(.*?)(\'.*?\')(.*?)";
+        String regex2 = "(.*?)(\".*?\")(.*?)";
+//        String regex = "\'.*\'";
+//        String regex2 = "\".*?\"";
+//        String str = "G:/wGame/LayaWorkSpace_hx/dadishu/dadishu-605/dadishu-QQFKDZZYX-new - 副本/src/view/GameStartView.js";
+        String tmp = "var method = ['onMouseDown','onMouseMove','start','end'];";
+        System.out.println(EditTools.filter(tmp));
+//        EditTools.getMatchLog(new File(str),regex,regex2);
 //        Matcher matcher = EditTools.getMatcher(ss,regex);
 //        if(matcher.find()){
 //            System.out.println(s1);
@@ -37,7 +39,6 @@ public class TestCode {
                 "\n" +
                 "\t";
 //        String bbb= aaa.replaceAll("\\r|\\n","");
-
 //        Pattern pattern = Pattern.compile(re);
 //        Matcher matcher = pattern.matcher(txt);
 //        System.out.println(matcher.find());

@@ -1,4 +1,4 @@
-package com.zhkj.exe2;
+package com.zhkj.exe;
 
 import com.zhkj.execute.CocosJSExcute;
 import com.zhkj.execute.CocosSceneExecute;

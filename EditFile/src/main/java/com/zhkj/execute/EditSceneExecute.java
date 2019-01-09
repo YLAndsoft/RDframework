@@ -22,37 +22,42 @@ public class EditSceneExecute {
 
     /**
      * 启动方法
-     * @param fileName 场景文件目录
+     * @param  file 场景文件目录
      */
-    public static void start(String fileName) throws Exception{
-        File file = new File(fileName);
+    public static void start(File file){
         File files[] = file.listFiles();
         if(null==files||files.length<0){return;}
         for(int i=0;i<files.length;i++){
             if(files[i].isFile()){
-                execute(files[i]);
+                //创建临时文件
+                File newWidgetPath = FileUtils.createNewFile(files[i].getAbsolutePath());
+                execute(files[i],newWidgetPath);
                 //删除修改之前的文件
                 if(files[i].exists()){
+                    String filesss = files[i].getName();
+                    File newFile = new File(files[i].getParent()+"/"+filesss);
+                    files[i].delete();//删除修改之前的文件
+                    newWidgetPath.renameTo(newFile);//重命名修改之后的文件名称
                     Log.appendInfo("删除文件>>>>>"+files[i].getName());
-                    files[i].delete();
+//                    EditTools.clearClazzValue();//清空类
                 }
             }else{
-                Log.appendInfo("需要修改场景文件目录并没有文件存在！！！");
+                start(files[i]);
             }
         }
 
     }
+
+
     /**
      * 执行方法
      * @param senceFile 场景文件
      */
-    private static void execute(File senceFile){
+    private static void execute(File senceFile,File newWidgetPath){
         BufferedReader br = null;
         FileOutputStream outputStream = null;
         OutputStreamWriter streamWriter = null;
         BufferedWriter w = null;
-        //创建临时文件
-        File newWidgetPath = FileUtils.createNewFile(senceFile.getAbsolutePath());
         try{
             //2.创建流
             br = new BufferedReader(new FileReader(senceFile));//构造一个BufferedReader类来读取文件

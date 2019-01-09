@@ -33,6 +33,8 @@ public class EditTools {
 
     private static String clazzName;//修改前的类字段名
     private static String editClazzName;//修改后的类字段名
+    private static String uncompileName;//解密方法名
+    private static boolean isinsertUncompile;//是否已经插入过解密方法
 
     private static String[] specialKey  = null;
 
@@ -56,6 +58,45 @@ public class EditTools {
         return tmp;
     }
 
+    public static void getWidgets(File file) {
+        //		    this.startbg=null;
+        String regex1 = "(\\s*this\\.\\s*)(\\w+)(\\s*\\=null;)";
+        BufferedReader br = null;
+        List<String> lists = new ArrayList<>();
+        try{
+            //2.创建流
+            br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            //3.读取行
+            String line = null;
+            while((line = br.readLine())!=null) {
+                Matcher matcher1 = getMatcher(line,regex1);
+                if (matcher1.find()){
+                    lists.add(matcher1.group(2));
+                }
+            }
+            Set set = new HashSet();
+            for (String cd:lists) {
+                if(set.add(cd)){ //去除重复的字段
+                    if(!isSpecialKey(cd)){ //不是特殊字段才去添加
+                        String random = getRandomString(getRandomInt(4,8));//随机生成4-6位控件名称
+                        widgets.put(cd,random);
+                        Log.appendInfo("字段名>>>"+cd+">>>修改成>>>"+random);
+                    }
+
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                if(br!=null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     /**
      * 修改图片文件名称
      * @param file 图片源文件路径
@@ -139,7 +180,6 @@ public class EditTools {
                     }
                 }
             }
-
         }
         return tmp;
     }
@@ -166,21 +206,89 @@ public class EditTools {
             tmp = replace(tmp,widgets);
         }
         if(null!=images&&images.size()>0){
-            tmp = replace(tmp,images);
+            tmp = replaceImage(tmp,images);
         }
         return tmp;
     }
 
-    public static String editJS(String tmp) {
+    public static String editJS(String tmp,String fileName) {
         //得到类字段名称
         clazzName = getClazzValue(tmp);//得到类字段名称
-        tmp = replaceAll(tmp);
         editClazzName = getMapValue(clazzName,fields);
-        tmp = insertCode(tmp,editClazzName);//插入无用代码
         tmp = filter(tmp);//过滤注释
+        tmp = replaceAll(tmp);
+        if(!isinsertUncompile){
+            //插入解密方法
+            if(!fileName.equals("layaUI.max.all.js")){
+                tmp = tmp+insertUncompileCode();
+                isInsertUncompile(true);
+            }
+        }
+        if(!fileName.equals("layaUI.max.all.js")){
+            tmp = compileTxt(tmp);//加密文本内容
+        }
+        tmp = insertCode(tmp,editClazzName);//插入无用代码
         return tmp;
     }
 
+    /**
+     * 加密文本
+     * @param tmp
+     * @return
+     */
+    public static String compileTxt(String tmp) {
+//        String regex1 = "(.*)(\'.*?\')(.*)";
+//        String regex2 = "(.*)(\".*?\")(.*)";
+        String regex1 = "(.*?)(\'.*?\')(.*?)";
+        String regex2 = "(.*?)(\".*?\")(.*?)";
+        Matcher matcher = getMatcher(tmp,regex1);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()){
+            String ss = matcher.group(2);
+            String regexx1 = "(.*\\')(.*?)(\\'.*)";
+            Matcher maa = getMatcher(ss,regexx1);
+            if(maa.find()){
+                ss = maa.group(2);
+            }
+            if(ss.equals("%")||ss.equals("")){
+                break;
+            }
+            ss = compile(ss);
+//            sb.append(matcher.group(1)+uncompileName+"('"+ss+"')"+matcher.group(3));
+            matcher.appendReplacement(sb, matcher.group(1)+uncompileName+"('"+ss+"')"+matcher.group(3));
+        }
+        matcher.appendTail(sb);
+        if(!sb.toString().equals("")){
+             tmp = sb.toString();
+        }
+        Matcher matcher2 = getMatcher(tmp,regex2);
+        StringBuffer sb1 = new StringBuffer();
+        while (matcher2.find()){
+            String ss = matcher2.group(2);
+            String regexx1 = "(.*\\\")(.*?)(\\\".*)";
+            Matcher maa = getMatcher(ss,regexx1);
+            if(maa.find()){
+                ss = maa.group(2);
+            }
+            if(ss.equals("%")||ss.equals("")){
+                break;
+            }
+            ss = compile(ss);
+            String s1 = matcher2.group(1);
+            String s3 = matcher2.group(3);
+            matcher2.appendReplacement(sb1, s1+uncompileName+"('"+ss+"')"+s3);
+        }
+        matcher2.appendTail(sb1);
+        if(!sb1.toString().equals("")){
+            tmp = sb1.toString();
+        }
+
+        return tmp;
+    }
+
+    public static void isInsertUncompile(boolean bool){
+        isinsertUncompile = bool;
+    }
     /**
      * 删除打印日志
      * @param tmp
@@ -222,6 +330,10 @@ public class EditTools {
             }
         }
         return clazzName;
+    }
+    public static void clearClazzValue(){
+        clazzName = null;//得到类字段名称
+        editClazzName = null;
     }
 
     /**
@@ -428,6 +540,45 @@ public class EditTools {
             }
         }
     }
+
+    public static void getMatchLog(File file,String rexeg,String rexeg2) {
+        BufferedReader br = null;
+        try{
+            //2.创建流
+            br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            //3.读取行
+            String line = null;
+            while((line = br.readLine())!=null) {
+                Matcher matcher = getMatcher(line,rexeg);
+                while (matcher.find()){
+                    String ss = matcher.group(2);
+                    System.out.println("----->>"+matcher.group(1));
+                    System.out.println("----->>"+matcher.group(2));
+                    System.out.println("----->>"+matcher.group(3));
+                    System.out.println("---------------------------------------->>>>>>>>");
+                }
+                Matcher matcher2 = getMatcher(line,rexeg2);
+                while (matcher2.find()){
+                    System.out.println("----->>"+matcher2.group(1));
+                    System.out.println("----->>"+matcher2.group(2));
+                    System.out.println("----->>"+matcher2.group(3));
+                    System.out.println("---------------------------------------->>>>>>>>");
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                if(br!=null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     /**
      * 全局替换
      * @param line
@@ -484,7 +635,28 @@ public class EditTools {
         }
         return tmp;
     }
+    private static String replaceImg(String line,Map<String,String> maps){
+        String tmp = line;
+        for (Map.Entry<String, String> entry : maps.entrySet()) {
+            String re = "(\\b"+entry.getKey()+"\\b)";
+            Matcher matcher = getMatcher(line,re);
+            if(matcher.find()){
+                String tt = tmp.substring(entry.getKey().length(),entry.getKey().length()+1);
+                if(tt.equals(".")){
+                    tmp =  tmp.replaceAll(re,entry.getValue());
+                }
+                Log.appendInfo("##"+line+">>> ##替换的关键字>>"+entry.getKey());
+            }
+        }
+        return tmp;
+    }
 
+    /***
+     * 替换图片名称
+     * @param line
+     * @param maps
+     * @return
+     */
     private static String replaceImage(String line,Map<String,String> maps){
         String tmp = line;
         for (Map.Entry<String, String> entry : maps.entrySet()) {
@@ -502,12 +674,62 @@ public class EditTools {
         return tmp;
     }
 
+    /***
+     * 加密方法
+     * @param str
+     * @return
+     */
+    public static String compile(String str){
+        char[] charList = str.toCharArray();
+        StringBuilder builder = new StringBuilder();
+        for(int i=0;i<charList.length;i++){
+            if(i != 0){
+                builder.append("%");
+            }
+            String numChar = Integer.toBinaryString(charList[i]);
+            String[] binaryList = numChar.split("");
+            for(int j=0;j<binaryList.length;j++){
+                builder.append(binaryList[j]);
+                int random = (int)(Math.random() * 10);
+                builder.append(random);
+            }
+        }
+        return builder.toString();
+    }
+    /***
+     * 插入解密方法
+     * @param
+     * @return
+     */
+    public static String insertUncompileCode(){
+        StringBuilder sb = new StringBuilder();
+        uncompileName = getRandomString(getRandomInt(1,8));//得到解密方法名
+        sb.append("      function "+uncompileName+"(str){\r\n");
+        sb.append("            var uncompileStrList = [];\r\n")
+                .append("            var ss = str+\"\"; \r\n")
+                .append("            var list = ss.split(\"%\"); \r\n")
+                .append("            for(var i=0;i<list.length;i++){\r\n")
+                .append("                var uncompileBinaryList = [];\r\n")
+                .append("                var compileBinaryList = list[i].split(\"\"); \r\n")
+                .append("                for(var j=0; j<compileBinaryList.length;j++){ \r\n")
+                .append("                    if(j%2 == 0){\r\n")
+                .append("                        uncompileBinaryList.push(compileBinaryList[j]); \r\n")
+                .append("                     } \r\n")
+                .append("                } \r\n")
+                .append("                var asciiCode = parseInt(uncompileBinaryList.join(\"\"),2); \r\n")
+                .append("                var charValue = String.fromCharCode(asciiCode); \r\n")
+                .append("                uncompileStrList.push(charValue); \r\n")
+                .append("            }\r\n")
+                .append("            return uncompileStrList.join(\"\"); \r\n")
+                .append("        }\r\n");
+        return sb.toString();
+    }
     /**
      * 插入无用的代码
      * @param line
      * @return
      */
-    public static String insertCode(String line,String newClazzName) {
+    public static String insertCode(String line,String editClazzName) {
         String regex = "(.*?)(\\/\\*\\*.*?\\*\\/)";
         Matcher matcher = getMatcher(line, regex);
         StringBuffer sb = new StringBuffer();
@@ -515,11 +737,11 @@ public class EditTools {
         while (matcher.find()){
             if((matcher.group(2).equals("/**#1*/"))){
                 //生成1-3条无用代码
-                tmp = getRandomCode(getRandomInt(1, 3));
+                tmp = getRandomCode(getRandomInt(1, 8));
                 matcher.appendReplacement(sb, matcher.group(1)+"\r\n"+tmp);
             }else if((matcher.group(2).equals("/**#2*/"))){
                 //生成无用方法
-                tmp = getRandomNoCode(newClazzName);
+                tmp = getRandomNoCode(editClazzName);
                 matcher.appendReplacement(sb, matcher.group(1)+"\r\n"+tmp);
             }
         }
@@ -582,7 +804,13 @@ public class EditTools {
                     tmp = tmp.substring(0, index);
                 }
             }
-
+        }
+        //过滤定义的方法组
+        //var method = ['onMouseDown','onMouseMove','start','end'];
+        String regex2 = "\\s*var\\s*method\\s*=\\s*\\[.*\\];\\s*";
+        Matcher matcher2 = getMatcher(tmp, regex2);
+        if(matcher2.find()){
+            tmp = "";
         }
         //[\r\n]/g
         tmp = tmp.replaceAll("[\\r\\n\\t]","");
@@ -596,10 +824,12 @@ public class EditTools {
     private static boolean isSpecialKey(String key){
         if(null==key||key.equals("")){return true;}
         boolean isSpecialKey=false;
-        for(int i = 0;i<specialKey.length;i++){
-            if(key.equals(specialKey[i])){
-                isSpecialKey = true;
-                break;
+        if(null!=specialKey&&specialKey.length>0){
+            for(int i = 0;i<specialKey.length;i++){
+                if(key.equals(specialKey[i])){
+                    isSpecialKey = true;
+                    break;
+                }
             }
         }
         return isSpecialKey;
@@ -622,17 +852,21 @@ public class EditTools {
     /**
      * 生成无用方法
      * Laya适用
-     * @param menthodKey 方法头
      */
-    public static String getRandomNoCode(String menthodKey) {
+    public static String getRandomNoCode(String editClazzName) {
         StringBuilder str = new StringBuilder();
         int randomNumber = getRandomInt(2, 10);
-        str.append(menthodKey + ModeRule.D);//_proto.
+        if(null!=editClazzName&&!editClazzName.equals("")){
+            str.append(editClazzName + ModeRule.D);//_proto.
+        }
         str.append(getRandomString(randomNumber));//方法名
-        str.append(" = function () { " + "\r\n");
+        if(null!=editClazzName&&!editClazzName.equals("")){
+            str.append(" = function() { " + "\r\n");
+        }else{
+            str.append(" () { " + "\r\n");
+        }
         str.append(getRandomCode());//插入方法内容
         str.append("}\r\n");
-
         return str.toString();
     }
     /**
@@ -684,19 +918,46 @@ public class EditTools {
      */
     public static String getRandomIntArray() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = [");
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = [");
         for (int i = 1; i <= randomNumber; i++) {
             if (i == randomNumber) {
-                str.append(getRandomInt(1, 100));
+                str1.append(getRandomInt(1, 100));
             } else {
-                str.append(getRandomInt(1, 100) + ",");
+                str1.append(getRandomInt(1, 100) + ",");
             }
         }
-        str.append("];");
-        return str.toString() + "\r\n";
+        str1.append("];");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str2.append(getRandomInt(1, 100));
+            } else {
+                str2.append(getRandomInt(1, 100) + ",");
+            }
+        }
+        str2.append("];");
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str3.append(getRandomInt(1, 100));
+            } else {
+                str3.append(getRandomInt(1, 100) + ",");
+            }
+        }
+        str3.append("];\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(";\r\n");
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -706,19 +967,47 @@ public class EditTools {
      */
     public static String getRandomStringArray() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = [");
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = [");
         for (int i = 1; i <= randomNumber; i++) {
             if (i == randomNumber) {
-                str.append('"' + getRandomString(randomNumber) + '"');
+                str1.append('"' + getRandomString(randomNumber) + '"');
             } else {
-                str.append('"' + getRandomString(randomNumber) + '"' + ",");
+                str1.append('"' + getRandomString(randomNumber) + '"' + ",");
             }
         }
-        str.append("];");
-        return str.toString() + "\r\n";
+        str1.append("];");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str2.append('"' + getRandomString(randomNumber) + '"');
+            } else {
+                str2.append('"' + getRandomString(randomNumber) + '"' + ",");
+            }
+        }
+        str2.append("];");
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str3.append('"' + getRandomString(randomNumber) + '"');
+            } else {
+                str3.append('"' + getRandomString(randomNumber) + '"' + ",");
+            }
+        }
+        str3.append("];\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(";");
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -728,19 +1017,47 @@ public class EditTools {
      */
     public static String getRandomCharArray() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = [");
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = [");
         for (int i = 1; i <= randomNumber; i++) {
             if (i == randomNumber) {
-                str.append("'" + getRandomString(randomNumber) + "'");
+                str1.append("'" + getRandomString(randomNumber) + "'");
             } else {
-                str.append("'" + getRandomString(randomNumber) + "',");
+                str1.append("'" + getRandomString(randomNumber) + "',");
             }
         }
-        str.append("];");
-        return str.toString() + "\r\n";
+        str1.append("];");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str2.append("'" + getRandomString(randomNumber) + "'");
+            } else {
+                str2.append("'" + getRandomString(randomNumber) + "',");
+            }
+        }
+        str2.append("];");
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = [");
+        for (int i = 1; i <= randomNumber; i++) {
+            if (i == randomNumber) {
+                str3.append("'" + getRandomString(randomNumber) + "'");
+            } else {
+                str3.append("'" + getRandomString(randomNumber) + "',");
+            }
+        }
+        str3.append("];\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(";");
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -750,13 +1067,24 @@ public class EditTools {
      */
     public static String getRandomInt() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = ");
-        str.append(getRandomInt(0, 9));
-        str.append(";");
-        return str.toString() + "\r\n";
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = ").append(getRandomInt(0, 9)).append(";");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = ").append(getRandomInt(0, 9)).append(";");
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = ").append(getRandomInt(0, 9)).append(";\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(" + ").append(edName3).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(" + ").append(edName1).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(" + ").append(edName2).append(";");
+
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -766,13 +1094,23 @@ public class EditTools {
      */
     public static String getRandomString() {
         int randomNumber = getRandomInt(3, 8);
+
+        String zdName1 = getRandomString(randomNumber);
         StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = " + "'");
-        str.append(getRandomString(randomNumber));
-        str.append("'" + ";");
-        return str.toString() + "\r\n";
+        str.append("\r\nvar ").append(zdName1).append(" = " + "'").append(getRandomString(randomNumber)).append("'" + ";");
+        String zdName2 = getRandomString(randomNumber);
+        StringBuilder str2 = new StringBuilder();
+        str2.append("\r\nvar ").append(zdName2).append(" = " + "'").append(getRandomString(randomNumber)).append("'" + ";");
+        String zdName3 = getRandomString(randomNumber);
+        StringBuilder str3 = new StringBuilder();
+        str3.append("\r\nvar ").append(zdName3).append(" = " + "'").append(getRandomString(randomNumber)).append("'" + ";\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(zdName1).append(" = ").append(zdName2).append(" + ").append(zdName3).append(";\r\n");
+        sb.append(zdName2).append(" = ").append(zdName3).append(" + ").append(zdName1).append(";\r\n");
+        sb.append(zdName3).append(" = ").append(zdName1).append(" + ").append(zdName2).append(";");
+
+        return str.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -782,34 +1120,61 @@ public class EditTools {
      */
     public static String getRandomDouble() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = ");
-        str.append(getRandomInt(0, 9) + "." + getRandomInt(0, 9));
-        str.append(";");
-        return str.toString() + "\r\n";
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = ").append(getRandomInt(0, 9) + "." + getRandomInt(0, 9)).append(";");
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = ").append(getRandomInt(0, 9) + "." + getRandomInt(0, 9)).append(";");
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = ").append(getRandomInt(0, 9) + "." + getRandomInt(0, 9)).append(";\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(" + ").append(edName3).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(" + ").append(edName1).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(" + ").append(edName2).append(";");
+
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
      * 生成随机定义bollean类型代码
-     *
      * @return
      */
     public static String getRandomBoolean() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = ");
-        int random = getRandomInt(0, 9);
-        if (random % 2 == 0) {
-            str.append("true");
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = ");
+        if (getRandomInt(0, 9) % 2 == 0) {
+            str1.append("true").append(";");
         } else {
-            str.append("false");
+            str1.append("false").append(";");
         }
-        str.append(";");
-        return str.toString() + "\r\n";
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = ");
+        if (getRandomInt(0, 9) % 2 == 0) {
+            str2.append("true").append(";");
+        } else {
+            str2.append("false").append(";");
+        }
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = ");
+        if (getRandomInt(0, 9) % 2 == 0) {
+            str3.append("true").append(";\r\n");
+        } else {
+            str3.append("false").append(";\r\n");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(";");
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     /**
@@ -819,13 +1184,24 @@ public class EditTools {
      */
     public static String getRandomFloat() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = ");
-        str.append(getRandomInt(1, 9) + "." + getRandomInt(1, 9));
-        str.append(";");
-        return str.toString() + "\r\n";
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = ").append(getRandomInt(1, 9) + "." + getRandomInt(1, 9)).append(";");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = ").append(getRandomInt(1, 9) + "." + getRandomInt(1, 9)).append(";");
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = ").append(getRandomInt(1, 9) + "." + getRandomInt(1, 9)).append(";\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(" + ").append(edName3).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(" + ").append(edName1).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(" + ").append(edName2).append(";");
+
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "\n";
     }
 
     /**
@@ -835,15 +1211,35 @@ public class EditTools {
      */
     public static String getRandomObject() {
         int randomNumber = getRandomInt(3, 8);
-        StringBuilder str = new StringBuilder();
-        str.append("var ");
-        str.append(getRandomString(randomNumber));
-        str.append(" = {");
+        StringBuilder str1 = new StringBuilder();
+        String edName1 = getRandomString(randomNumber);
+        str1.append("\r\nvar ").append(edName1).append(" = {");
         for (int i = 0; i < randomNumber; i++) {
-            str.append(getRandomString(randomNumber) + ":" + getRandomObject(getRandomInt(0, 3)) + ",");
+            str1.append(getRandomString(randomNumber) + ":" + getRandomObject(getRandomInt(0, 3)) + ",");
         }
-        str.append("};");
-        return str.toString() + "\r\n";
+        str1.append("};");
+
+        StringBuilder str2 = new StringBuilder();
+        String edName2 = getRandomString(randomNumber);
+        str2.append("\r\nvar ").append(edName2).append(" = {");
+        for (int i = 0; i < randomNumber; i++) {
+            str2.append(getRandomString(randomNumber) + ":" + getRandomObject(getRandomInt(0, 3)) + ",");
+        }
+        str2.append("};");
+
+        StringBuilder str3 = new StringBuilder();
+        String edName3 = getRandomString(randomNumber);
+        str3.append("\r\nvar ").append(edName3).append(" = {");
+        for (int i = 0; i < randomNumber; i++) {
+            str3.append(getRandomString(randomNumber) + ":" + getRandomObject(getRandomInt(0, 3)) + ",");
+        }
+        str3.append("};\r\n");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+        sb.append(edName3).append(" = ").append(edName1).append(";");
+        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
     }
 
     private static Object getRandomObject(int random) {
@@ -872,7 +1268,6 @@ public class EditTools {
 
     /**
      * 随机从9种无用代码中产生
-     *
      * @param number //产生几条无用代码
      * @return
      */
@@ -915,7 +1310,18 @@ public class EditTools {
         }
 
     }
+    public static void main(String[] areg){
+        System.out.println(insertUncompileCode());
+//        System.out.println(getRandomInt());
+//        System.out.println(getRandomFloat());
+//        System.out.println(getRandomDouble());
+//        System.out.println(getRandomBoolean());
+//        System.out.println(getRandomObject());
+//        System.out.println(getRandomIntArray());
+//        System.out.println(getRandomStringArray());
+//        System.out.println(getRandomCharArray());
 
+    }
 
 
 }

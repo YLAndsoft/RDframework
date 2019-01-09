@@ -23,10 +23,9 @@ public class EditImageExecute {
 
     /**
      * 修改图片
-     * @param imagePath 图片文件夹
+     * @param imagegFile 图片文件夹
      */
-    public static void execute(String imagePath){
-        File imagegFile = new File(imagePath);
+    public static void execute(File imagegFile){
         File files[] = imagegFile.listFiles();
         if(null==files||files.length<0){return;}
         for(int i=0;i<files.length;i++){
@@ -34,7 +33,7 @@ public class EditImageExecute {
                 //修改图片名称,并把修改的记录保存到集合里面
                 EditTools.editImageName(files[i]);
             }else{
-                Log.appendInfo("需要修改图片的文件目录并没有图片文件！！！");
+                execute(files[i]);
             }
         }
     }

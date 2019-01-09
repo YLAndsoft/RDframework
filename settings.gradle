@@ -1,1 +1,1 @@
-include ':app', ':base', ':tools', ':db', ':ui', ':file', ':net'
+include ':app', ':base', ':tools', ':db', ':ui', ':file', ':net', ':datepicker', ':EditFile'

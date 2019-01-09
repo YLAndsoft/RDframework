@@ -16,13 +16,11 @@
             android:textSize="22sp"
             android:textColor="@color/white"/>
     </RelativeLayout>
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="20dp"
-        android:text="模块四"/>
+        android:layout_height="wrap_content"
+        android:scrollbars="none"/>
 
 
 </LinearLayout>
