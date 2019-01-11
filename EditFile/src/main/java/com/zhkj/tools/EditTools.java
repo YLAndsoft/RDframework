@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import wxXCX.EditWxExecute;
+
 /**
  * @author: FYL
  * @time: 2018/12/4
@@ -133,6 +135,96 @@ public class EditTools {
         line = replace(line,fields);
         return line;
     }
+
+    /**
+     * 修改小程序pages目录下的JS文件
+     * @param tmp
+     * @return
+     */
+    public static String editWxPagesJS(String tmp){
+        tmp = replaceWxD(tmp, EditWxExecute.mapDirectory);//修改目录
+        tmp = replaceWxF(tmp,EditWxExecute.mapFiles);//修改文件名称
+        tmp = replace(tmp,methods);//修改方法
+        //插入无用代码
+        tmp = insertWxCode(tmp);//插入无用代码
+        tmp = filter(tmp);//过滤注释
+        return tmp;
+    }
+
+    public static String editWxAppJson(String tmp){
+        tmp = replaceWxD(tmp, EditWxExecute.mapDirectory);//修改目录
+        tmp = replaceWxF(tmp,EditWxExecute.mapFiles);//修改文件名称
+        return tmp;
+    }
+
+    public static String editConfJs(String tmp){
+        if(!isinsertUncompile){
+                //插入解密方法
+                tmp = tmp+insertUncompileCode();
+                isInsertUncompile(true);
+        }
+        tmp = compileTxt(tmp);//加密文本内容
+        return tmp;
+    }
+
+    /**
+     * 替换微信目录文件名称
+     * @param line
+     * @param maps
+     * @return
+     */
+    private static String replaceWxD(String line,Map<String,String> maps){
+        String tmp = line;
+        //          url: '../flgaem/flgaem?level=0&type=1&gold=' + gold,
+        for (Map.Entry<String, String> entry : maps.entrySet()) {
+            String key = entry.getKey();
+            String re = "(\\b"+key+"\\b)";
+            Matcher matcher = getMatcher(line,re);
+            while (matcher.find()){
+                int index = tmp.indexOf(key);
+                if(index>0){
+                    String subFrist = tmp.substring(index-1,index);//得到key前面一个字符
+                    String subLast = tmp.substring(index+key.length(),index+key.length()+1);//得到key后面一个字符
+                    if("/".equals(subFrist)&&"/".equals(subLast)){ //前后都是/的话，说明是目录名
+                        String regex = "(\\/\\b"+key+"\\/\\b)";
+                        tmp =  tmp.replaceAll(regex,"/"+entry.getValue()+"/");
+                        Log.appendInfo("##"+tmp+">>> ##替换的关键字>>"+entry.getKey());
+                    }
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * 替换文件名称
+     * @param line
+     * @param maps
+     * @return
+     */
+    private static String replaceWxF(String line,Map<String,String> maps){
+        String tmp = line;
+        //          url: '../flgaem/flgaem?level=0&type=1&gold=' + gold,
+        for (Map.Entry<String, String> entry : maps.entrySet()) {
+            String key = entry.getKey();
+            String re = "(\\b"+key+"\\b)";
+            Matcher matcher = getMatcher(line,re);
+            while (matcher.find()){
+                int index = tmp.indexOf(key);
+                if(index>0){
+                    String subFrist = tmp.substring(index-1,index);//得到key前面一个字符
+                    String subLast = tmp.substring(index+key.length(),index+key.length()+1);//得到key后面一个字符
+                    if("/".equals(subFrist)&&!"/".equals(subLast)){  //前面是/后面是不是，说明是js文件名
+                        String regex = "(\\/\\b"+key+"\\b)";
+                        tmp =  tmp.replaceAll(regex,"/"+entry.getValue());
+                        Log.appendInfo("##"+tmp+">>> ##替换的关键字>>"+entry.getKey());
+                    }
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
      * 是否是.mete文件
      * @param file
@@ -160,6 +252,78 @@ public class EditTools {
             return true;
         }
         return false;
+    }
+    /**
+     * 是否是app.json文件
+     * @param file
+     * @return
+     */
+    public static boolean isAppJsonFile(File file){
+        String metaName = file.getName();//得到文件名称
+        String meteRegex = "(.*)(\\.json)$";
+        Matcher matcher = getMatcher(metaName,meteRegex);
+        if(matcher.find()){
+           String name =  matcher.group(1);
+           if("app".equals(name)){return true;}
+        }
+        return false;
+    }
+    public static boolean isConfFile(File file){
+        String metaName = file.getName();//得到文件名称
+        String meteRegex = "(.*)(\\.js)$";
+        Matcher matcher = getMatcher(metaName,meteRegex);
+        if(matcher.find()){
+            String name =  matcher.group(1);
+            if("conf".equals(name)){return true;}
+        }
+        return false;
+    }
+    /**
+     * 是否是.js文件
+     * @param file
+     * @return
+     */
+    public static boolean isJSFile(File file){
+        String metaName = file.getName();//得到文件名称
+        String meteRegex = "(.*\\.)(js)$";
+        Matcher matcher = getMatcher(metaName,meteRegex);
+        if(matcher.find()){
+            return true;
+        }
+        return false;
+    }
+    /**
+     * 是否是.wxml文件
+     * @param file
+     * @return
+     */
+    public static boolean isWXmlFile(File file){
+        String metaName = file.getName();//得到文件名称
+        String meteRegex = "(.*\\.)(wxml)$";
+        Matcher matcher = getMatcher(metaName,meteRegex);
+        if(matcher.find()){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 返回JS文件名称
+     * @param file
+     * @return
+     */
+    public static String checkFile(File file){
+        try{
+            String metaName = file.getName();//得到文件名称
+            String meteRegex = "(.*)(\\.\\w+)$";
+            Matcher matcher = getMatcher(metaName,meteRegex);
+            if(matcher.find()){
+                return matcher.group(1);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -211,6 +375,12 @@ public class EditTools {
         return tmp;
     }
 
+    /**
+     * 修改LayaJs文件
+     * @param tmp
+     * @param fileName
+     * @return
+     */
     public static String editJS(String tmp,String fileName) {
         //得到类字段名称
         clazzName = getClazzValue(tmp);//得到类字段名称
@@ -286,6 +456,10 @@ public class EditTools {
         return tmp;
     }
 
+    /**
+     * 是否已经插入过解密方法
+     * @param bool
+     */
     public static void isInsertUncompile(boolean bool){
         isinsertUncompile = bool;
     }
@@ -301,6 +475,11 @@ public class EditTools {
         return tmp;
     }
 
+    /**
+     * 修改cocos的JS文件
+     * @param tmp
+     * @return
+     */
     public static String editCocosJS(String tmp) {
         String regex2 = "(\\s*var\\s*)(\\bmethod\\b)(\\s*=)";
         Matcher matcher2 = getMatcher(tmp, regex2);
@@ -461,7 +640,6 @@ public class EditTools {
                     String met[] = me.split(",");
                     for(int i = 0;i<met.length;i++){
                         String method = met[i].substring(1,met[i].length()-1);
-//                        System.out.println("方法名："+method);
                         lists.add(method);
                     }
                 }
@@ -602,21 +780,21 @@ public class EditTools {
 
     /**
      * 根据key得到value
-     * @param methods
+     * @param key
      * @return
      */
-    private static String getMapValue(String methods,Map<String,String> map) {
+    public static String getMapValue(String key,Map<String,String> map) {
         if(null==map||map.size()<=0){return null;}
-        if(null==methods||"".equals(methods)){return null;}
-        String mapMethod = null;
+        if(null==key||"".equals(key)){return null;}
+        String value = null;
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            String method = entry.getKey();
-            if(methods.equals(method)){
-                mapMethod = entry.getValue();
+            String data = entry.getKey();
+            if(key.equals(data)){
+                value = entry.getValue();
                 break;
             }
         }
-        return mapMethod;
+        return value;
     }
     /**
      * 替换字段名,控件名，方法名
@@ -774,6 +952,37 @@ public class EditTools {
     }
 
     /**
+     * 插入小程序无用代码
+     * @param tmpLine
+     * @return
+     */
+    public static String insertWxCode(String tmpLine){
+        String regex = "(.*?)(\\/\\*\\*.*?\\*\\/)";
+        Matcher matcher = getMatcher(tmpLine, regex);
+        StringBuffer sb = new StringBuffer();
+        String tmp = tmpLine;
+        while (matcher.find()){
+            if((matcher.group(2).equals("/**#1*/"))){
+                //生成1-8条无用代码
+                tmp = getRandomCode(getRandomInt(1, 8));
+                matcher.appendReplacement(sb, matcher.group(1)+"\r\n"+tmp);
+            }else if((matcher.group(2).equals("/**#2*/"))){
+                //生成无用方法 例子： /**#2*/:xxxxx: function () {
+                tmp = getRandomCocosNoCode();
+                matcher.appendReplacement(sb, matcher.group(1)+tmp+"\r\n");
+            }else if((matcher.group(2).equals("/**#3*/"))){
+                //生成无用方法 例子： function xxxxx(){}
+                tmp = getRandomWxCode();
+                matcher.appendReplacement(sb, matcher.group(1)+tmp+"\r\n");
+            }else if((matcher.group(2).equals("/**#4*/"))){
+                //生成无用方法 例子： xxxxx: function () {
+
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+    /**
      * 过滤注释
      * @param line
      */
@@ -876,11 +1085,26 @@ public class EditTools {
     public static String getRandomCocosNoCode() {
         StringBuilder str = new StringBuilder();
         int randomNumber = getRandomInt(3, 8);
-        str.append(getRandomString(randomNumber));//方法名
+        str.append(","+getRandomString(randomNumber));//方法名
         // restartGame: function () {
         str.append(" : function () { " + "\r\n");
         str.append(getRandomCode());//插入方法内容
-        str.append("},\r\n");
+        str.append("}\r\n");
+
+        return str.toString();
+    }
+    /**
+     * 生成无用方法
+     * Cocos适用
+     */
+    public static String getRandomWxCode() {
+        StringBuilder str = new StringBuilder();
+        int randomNumber = getRandomInt(3, 8);
+        String methodName = getRandomString(randomNumber);
+        // xxxxx: function () {
+        str.append(" function "+methodName+"() { " + "\r\n");
+        str.append(getRandomCode());//插入方法内容
+        str.append("}\r\n");
 
         return str.toString();
     }

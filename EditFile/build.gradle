@@ -11,3 +11,11 @@ targetCompatibility = "1.7"
 tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
 }
+task makeJar(type: Copy) {
+//    delete 'build/TestJar_V1.0.jar' //删除之前的旧jar包
+    from('G:/HSJ/code/RDframework/EditFile/build/classes/java/main/') //从这个目录下取出默认jar包
+    into('build/') //将jar包输出到指定目录下
+    include('classes.jar')
+    rename('classes.jar', 'TestJar_V1.0.jar') //自定义jar包的名字
+}
+makeJar.dependsOn(build)

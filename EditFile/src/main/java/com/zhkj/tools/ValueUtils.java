@@ -19,6 +19,7 @@ public class ValueUtils {
     public static final String IMAGE_DIRECTORY = "imageDirectory";	//图片文件目录
     public static final String SCENE_DIRECTORY = "sceneDirectory";	//场景文件目录
     public static final String EDITJS_DIRECTORY = "editJsDirectory";	//修改JS文件目录
+    public static final String PAGES_DIRECTORY = "pagesDirectory";	//修改JS文件目录
     public static final String IS_OPEN = "isOpen";	//是否打印日志
     public static final String IS_LAYA = "isLaya";//是否是Laya混淆
 

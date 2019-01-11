@@ -9,6 +9,8 @@ import com.zhkj.ui.UITools;
 
 import java.io.File;
 
+import wxXCX.WXExecute;
+
 /**
  * @author: FYL
  * @time: 2018/12/4
@@ -42,17 +44,22 @@ public class EditStart {
             String editJsDirectory = ReadFileAddModule.getValue(ValueUtils.EDITJS_DIRECTORY);
             //场景文件目录
             String sceneDirectory = ReadFileAddModule.getValue(ValueUtils.SCENE_DIRECTORY);
+            //小程序混淆
+            String pagesDirectory = ReadFileAddModule.getValue(ValueUtils.PAGES_DIRECTORY);
             //是否打印日志
             String isOpen = ReadFileAddModule.getValue(ValueUtils.IS_OPEN);
             //是否是Laya混淆
             String isLaya = ReadFileAddModule.getValue(ValueUtils.IS_LAYA);
-
             if(isOpen.equals("true")){
                 //创建日志文件
-                File logFile = FileUtils.createLogFile(imageDirectory);
+                File logFile = FileUtils.createLogFile(imageDirectory==null?pagesDirectory:imageDirectory);
                 Log.init(logFile,true);
             }else{
                 Log.init(false);
+            }
+            if(null!=pagesDirectory){
+                WXExecute.exe(pagesDirectory);
+                return;
             }
             //修改控件名称，修改图片名称
             if(isLaya.equals("true")){
