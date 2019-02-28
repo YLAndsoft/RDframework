@@ -43,7 +43,7 @@ public class CocosJSExcute {
             if (files[i].isFile()) {
                 //得到所有的字段，方法名
                 Log.appendInfo("开始寻找"+files[i].getName()+"文件里面的字段方法------------------------------------------");
-                EditTools.getCocosFields(files[i]);
+//                EditTools.getCocosFields(files[i]);
                 EditTools.getCocosMethods(files[i]);
                 Log.appendInfo("完成寻找------------------------------------------");
             } else {

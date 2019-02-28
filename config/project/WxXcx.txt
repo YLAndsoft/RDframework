@@ -1,0 +1,5 @@
+无|标题|混淆小程序|1
+pagesDirectory|选择文件夹|1.请选择pages文件目录|选择目录
+isOpen|JComboBox下拉选|是否打印日志|true|false
+无|混淆|按钮|开始混淆!
+关键字|SpecialKey=Loader,Handler,i,View,Dialogx,x,y

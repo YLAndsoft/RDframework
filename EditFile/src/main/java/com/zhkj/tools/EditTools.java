@@ -55,6 +55,19 @@ public class EditTools {
             widgets.put(matcher.group(2),random);//保存控件名称和对应的随机值
             Log.appendInfo("控件名称>>>"+matcher.group(2)+">>>修改成>>>"+random);
         }
+        //如果文件是.ts
+        //public bgview:Laya.Image;
+        String widgetRegex1 = "(\\s*public\\s*)(\\w+)(:laya\\.||:Laya\\.)(.*;)";
+        Matcher matcher1 = EditTools.getMatcher(line,widgetRegex1);
+        if(matcher1.find()){
+            String random = getRandomString(getRandomInt(4,6));//随机生成4-6位控件名称
+            if(!matcher1.group(2).equals("static")){
+                tmp = matcher1.group(1)+random+matcher1.group(3);
+                widgets.put(matcher1.group(2),random);//保存控件名称和对应的随机值
+                Log.appendInfo("控件名称>>>"+matcher1.group(2)+">>>修改成>>>"+random);
+            }
+
+        }
         //替换其他地方引用这个控件名称
         tmp = EditTools.replace(line,widgets);
         return tmp;
@@ -63,6 +76,7 @@ public class EditTools {
     public static void getWidgets(File file) {
         //		    this.startbg=null;
         String regex1 = "(\\s*this\\.\\s*)(\\w+)(\\s*\\=null;)";
+        String regex2 = "(\\s*public\\s*)(\\w+)(:laya\\.||:Laya\\.)(.*;)";
         BufferedReader br = null;
         List<String> lists = new ArrayList<>();
         try{
@@ -74,6 +88,12 @@ public class EditTools {
                 Matcher matcher1 = getMatcher(line,regex1);
                 if (matcher1.find()){
                     lists.add(matcher1.group(2));
+                }
+                Matcher matcher2 = getMatcher(line,regex2);
+                if (matcher2.find()){
+                    if(!matcher2.group(2).equals("static")){ //不等於静态关键字
+                        lists.add(matcher2.group(2));
+                    }
                 }
             }
             Set set = new HashSet();
@@ -388,13 +408,14 @@ public class EditTools {
         tmp = filter(tmp);//过滤注释
         tmp = replaceAll(tmp);
         if(!isinsertUncompile){
-            //插入解密方法
-            if(!fileName.equals("layaUI.max.all.js")){
+            //插入解密方法layaUI.max.all.ts
+
+            if(!fileName.equals("layaUI.max.all.js")&&!fileName.equals("layaUI.max.all.ts")){
                 tmp = tmp+insertUncompileCode();
                 isInsertUncompile(true);
             }
         }
-        if(!fileName.equals("layaUI.max.all.js")){
+        if(!fileName.equals("layaUI.max.all.js")&&!fileName.equals("layaUI.max.all.ts")){
             tmp = compileTxt(tmp);//加密文本内容
         }
         tmp = insertCode(tmp,editClazzName);//插入无用代码
@@ -1085,11 +1106,12 @@ public class EditTools {
     public static String getRandomCocosNoCode() {
         StringBuilder str = new StringBuilder();
         int randomNumber = getRandomInt(3, 8);
-        str.append(","+getRandomString(randomNumber));//方法名
+        str.append(",");
+        str.append(getRandomString(randomNumber));//方法名
         // restartGame: function () {
         str.append(" : function () { " + "\r\n");
         str.append(getRandomCode());//插入方法内容
-        str.append("}\r\n");
+        str.append("}"+"\r\n");
 
         return str.toString();
     }
@@ -1459,11 +1481,12 @@ public class EditTools {
         }
         str3.append("};\r\n");
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
-        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
-        sb.append(edName3).append(" = ").append(edName1).append(";");
-        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(edName1).append(" = ").append(edName2).append(";\r\n");
+//        sb.append(edName2).append(" = ").append(edName3).append(";\r\n");
+//        sb.append(edName3).append(" = ").append(edName1).append(";");
+//        return str1.toString()+str2.toString()+str3.toString()+sb.toString() + "";
+        return str1.toString()+str2.toString()+str3.toString()+ "";
     }
 
     private static Object getRandomObject(int random) {

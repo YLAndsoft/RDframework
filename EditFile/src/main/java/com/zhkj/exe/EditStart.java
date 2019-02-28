@@ -52,7 +52,7 @@ public class EditStart {
             String isLaya = ReadFileAddModule.getValue(ValueUtils.IS_LAYA);
             if(isOpen.equals("true")){
                 //创建日志文件
-                File logFile = FileUtils.createLogFile(imageDirectory==null?pagesDirectory:imageDirectory);
+                File logFile = FileUtils.createLogFile(imageDirectory==null?pagesDirectory==null?editJsDirectory:pagesDirectory:imageDirectory);
                 Log.init(logFile,true);
             }else{
                 Log.init(false);

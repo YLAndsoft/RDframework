@@ -100,7 +100,10 @@ public class EditJSExecute {
             streamWriter = new OutputStreamWriter(outputStream,"UTF-8");
             w = new BufferedWriter(streamWriter);
             String line = null;
-            String tmp = null;//临时行
+            String tmp = null;//临时行+
+            if(file.getName().equals("layaUI.max.all.ts")){
+                String ss = file.getName();
+            }
             while((line = br.readLine())!=null) {
                 tmp = line;
                 //去修改方法名，字段名，控件名，图片名等引用的地方
